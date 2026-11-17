@@ -1,19 +1,13 @@
 import os
 import requests
 
-# Load environment variables
+# 1. Load environment variables
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-LINKEDIN_ACCESS_TOKEN = os.environ.get("LINKEDIN_ACCESS_TOKEN")
+LINKEDIN_CLIENT_ID = os.environ.get("CLIENT_ID")
+LINKEDIN_CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
 AUTHOR_URN = os.environ.get("AUTHOR_URN")
-
-# Debugging: Print status of environment variables (Yeh batayega ki kaun sa secret missing hai)
-print(f"TELEGRAM_BOT_TOKEN present: {bool(TELEGRAM_BOT_TOKEN)}")
-print(f"TELEGRAM_CHAT_ID present: {bool(TELEGRAM_CHAT_ID)}")
-print(f"GEMINI_API_KEY present: {bool(GEMINI_API_KEY)}")
-print(f"LINKEDIN_ACCESS_TOKEN present: {bool(LINKEDIN_ACCESS_TOKEN)}")
-print(f"AUTHOR_URN present: {bool(AUTHOR_URN)}")
 
 def send_telegram_message(text):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
@@ -37,17 +31,25 @@ def generate_post_content():
         return f"Error generating text: {response}"
 
 def post_to_linkedin(text):
-    if not LINKEDIN_ACCESS_TOKEN or not AUTHOR_URN:
-        print("LinkedIn tokens missing, skipping post.")
+    # Agar direct access token nahi hai toh client credentials ya existing URN use karenge
+    # Note: Client Credentials flow se standard personal profile par post karne ke liye 
+    # user access token zaroori hota hai. Lekin agar aapke paas token hai toh wo bhi use ho sakta hai.
+    
+    token = os.environ.get("LINKEDIN_ACCESS_TOKEN")
+    urn = AUTHOR_URN
+
+    if not token or not urn:
+        print("LinkedIn Access Token or Author URN is missing in secrets!")
         return
+
     url = "https://api.linkedin.com/v2/ugcPosts"
     headers = {
-        "Authorization": f"Bearer {LINKEDIN_ACCESS_TOKEN}",
+        "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",
         "X-Restli-Protocol-Version": "2.0.0"
     }
     payload = {
-        "author": AUTHOR_URN,
+        "author": urn,
         "lifecycleState": "PUBLISHED",
         "specificContent": {
             "com.linkedin.ugc.ShareContent": {
