@@ -22,9 +22,10 @@ jobs:
 
       - name: Run Automation Script
         env:
-          TELEGRAM_BOT_TOKEN: ${<}secrets.TELEGRAM_BOT_TOKEN{>}
-          TELEGRAM_CHAT_ID: ${<}secrets.TELEGRAM_CHAT_ID{>}
-          GEMINI_API_KEY: ${<}secrets.GEMINI_API_KEY{>}
-          LINKEDIN_ACCESS_TOKEN: ${<}secrets.LINKEDIN_ACCESS_TOKEN{>}
-          AUTHOR_URN: ${<}secrets.AUTHOR_URN{>}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          AUTHOR_URN: ${{ secrets.AUTHOR_URN }}
+          DRY_RUN: "1"
         run: python script.py
