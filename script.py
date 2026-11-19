@@ -7,7 +7,12 @@ LI_TOKEN = os.environ.get("LINKEDIN_ACCESS_TOKEN")
 AUTHOR_URN = os.environ.get("AUTHOR_URN")
 DRY_RUN = os.environ.get("DRY_RUN") == "1"
 
-GEMINI_MODEL = "gemini-3.8-flash"
+# Pehla model busy ho to agla try hoga
+GEMINI_MODELS = [
+    "gemini-3.8-flash",
+    "gemini-flash-latest",
+    "gemini-flash-lite-latest",
+]
 
 TOPICS = [
     "a practical career guidance tip for freshers",
@@ -41,27 +46,35 @@ def generate():
         "Practical, warm tone. End with one question for readers. "
         "No markdown symbols like ** or #, max 3 hashtags at the end."
     )
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
-    for attempt in range(1, 4):
-        try:
-            r = requests.post(
-                url,
-                headers={"x-goog-api-key": GEMINI_KEY},
-                json={"contents": [{"parts": [{"text": prompt}]}]},
-                timeout=150,
-            )
-            print(f"Gemini attempt {attempt} status:", r.status_code)
-            if r.status_code == 200:
-                text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
-                text = text.replace("**", "").strip()
-                if text:
-                    return text
-                print("Gemini returned empty text")
-            else:
-                print(r.text[:300])
-        except Exception as e:
-            print(f"Gemini attempt {attempt} failed:", type(e).__name__)
-        time.sleep(10)
+    for model in GEMINI_MODELS:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+        for attempt in range(1, 3):
+            try:
+                r = requests.post(
+                    url,
+                    headers={"x-goog-api-key": GEMINI_KEY},
+                    json={"contents": [{"parts": [{"text": prompt}]}]},
+                    timeout=60,
+                )
+                print(f"[{model}] attempt {attempt} status:", r.status_code)
+                if r.status_code == 200:
+                    text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+                    text = text.replace("**", "").strip()
+                    if text:
+                        print(f"Used model: {model}")
+                        return text
+                    print("Empty text returned")
+                elif r.status_code in (400, 401, 403):
+                    print(r.text[:300])
+                    return None  # key ya request ki problem, model badalne se nahi theek hoga
+                elif r.status_code == 404:
+                    print("Model not found, trying next model")
+                    break
+                else:
+                    print(r.text[:200])
+            except Exception as e:
+                print(f"[{model}] attempt {attempt} failed:", type(e).__name__)
+            time.sleep(5)
     return None
 
 def post_linkedin(text):
