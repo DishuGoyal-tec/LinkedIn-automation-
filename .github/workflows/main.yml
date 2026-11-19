@@ -1,12 +1,19 @@
-name: LinkedIn Daily Automation
+name: LinkedIn Daily Draft
 
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '30 11 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: linkedin-state
+  cancel-in-progress: false
+
 jobs:
-  run-script:
+  generate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -20,12 +27,19 @@ jobs:
       - name: Install Dependencies
         run: pip install requests
 
-      - name: Run Automation Script
+      - name: Generate draft
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
           AUTHOR_URN: ${{ secrets.AUTHOR_URN }}
-          DRY_RUN: "1"
-        run: python script.py
+        run: python script.py generate
+
+      - name: Save state
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state.json || true
+          git diff --cached --quiet || (git commit -m "update state" && git pull --rebase && git push)
