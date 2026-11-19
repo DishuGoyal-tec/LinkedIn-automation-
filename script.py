@@ -1,75 +1,96 @@
-import os
-import requests
+import os, sys, datetime, requests
 
-# 1. Load environment variables
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-LINKEDIN_CLIENT_ID = os.environ.get("CLIENT_ID")
-LINKEDIN_CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
+TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+TG_CHAT = os.environ.get("TELEGRAM_CHAT_ID")
+GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
+LI_TOKEN = os.environ.get("LINKEDIN_ACCESS_TOKEN")
 AUTHOR_URN = os.environ.get("AUTHOR_URN")
+DRY_RUN = os.environ.get("DRY_RUN") == "1"
 
-def send_telegram_message(text):
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        print("Telegram tokens missing, skipping message.")
+TOPICS = [
+    "a practical career guidance tip for freshers",
+    "a healthy habit for focus and mental clarity while working",
+    "a data analytics lesson explained simply",
+    "a lesson from building something from scratch",
+    "a common mistake people make while job hunting",
+    "how to learn a new skill consistently",
+    "a weekend reflection on growth and patience",
+]
+
+def tg(text):
+    if not TG_TOKEN or not TG_CHAT:
+        print("Telegram secrets missing")
         return
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": text, "parse_mode": "Markdown"}
-    res = requests.post(url, json=payload)
-    print(f"Telegram Response: {res.status_code}")
+    r = requests.post(
+        f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage",
+        json={"chat_id": TG_CHAT, "text": text[:4000]},
+        timeout=30,
+    )
+    print("Telegram status:", r.status_code)
 
-def generate_post_content():
-    if not GEMINI_API_KEY:
-        return "Error: Gemini API Key is missing."
-    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
-    prompt = "Write an engaging, high-retention LinkedIn post about tech trends and personal growth, formatted with clean line breaks and hooks for an influencer."
-    payload = {"contents": [{"parts": [{"text": prompt}]}]}
-    response = requests.post(gemini_url, json=payload).json()
+def generate():
+    if not GEMINI_KEY:
+        print("Gemini key missing")
+        return None
+    topic = TOPICS[datetime.date.today().weekday()]
+    prompt = (
+        f"Write a LinkedIn post under 180 words about {topic}. "
+        "Start with a strong one-line hook. Short lines with line breaks. "
+        "Practical, warm tone. End with one question for readers. "
+        "No markdown symbols like ** or #, max 3 hashtags at the end."
+    )
     try:
-        return response['candidates'][0]['content']['parts'][0]['text']
+        r = requests.post(
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+            headers={"x-goog-api-key": GEMINI_KEY},
+            json={"contents": [{"parts": [{"text": prompt}]}]},
+            timeout=60,
+        )
+        print("Gemini status:", r.status_code)
+        if r.status_code != 200:
+            print(r.text[:300])
+            return None
+        text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+        return text.replace("**", "").strip() or None
     except Exception as e:
-        return f"Error generating text: {response}"
+        print("Gemini failed:", type(e).__name__)
+        return None
 
-def post_to_linkedin(text):
-    # Agar direct access token nahi hai toh client credentials ya existing URN use karenge
-    # Note: Client Credentials flow se standard personal profile par post karne ke liye 
-    # user access token zaroori hota hai. Lekin agar aapke paas token hai toh wo bhi use ho sakta hai.
-    
-    token = os.environ.get("LINKEDIN_ACCESS_TOKEN")
-    urn = AUTHOR_URN
-
-    if not token or not urn:
-        print("LinkedIn Access Token or Author URN is missing in secrets!")
-        return
-
-    url = "https://api.linkedin.com/v2/ugcPosts"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-        "X-Restli-Protocol-Version": "2.0.0"
-    }
-    payload = {
-        "author": urn,
-        "lifecycleState": "PUBLISHED",
-        "specificContent": {
-            "com.linkedin.ugc.ShareContent": {
-                "shareCommentary": {"text": text},
-                "shareMediaCategory": "NONE"
-            }
+def post_linkedin(text):
+    if not LI_TOKEN or not AUTHOR_URN:
+        print("LinkedIn secrets missing")
+        return False
+    r = requests.post(
+        "https://api.linkedin.com/v2/ugcPosts",
+        headers={
+            "Authorization": f"Bearer {LI_TOKEN}",
+            "Content-Type": "application/json",
+            "X-Restli-Protocol-Version": "2.0.0",
         },
-        "visibility": {
-            "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
-        }
-    }
-    response = requests.post(url, headers=headers, json=payload)
-    print(f"LinkedIn API Response: {response.status_code} - {response.text}")
+        json={
+            "author": AUTHOR_URN,
+            "lifecycleState": "PUBLISHED",
+            "specificContent": {
+                "com.linkedin.ugc.ShareContent": {
+                    "shareCommentary": {"text": text},
+                    "shareMediaCategory": "NONE",
+                }
+            },
+            "visibility": {"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"},
+        },
+        timeout=30,
+    )
+    print("LinkedIn status:", r.status_code, r.text[:300])
+    return r.status_code in (200, 201)
 
 if __name__ == "__main__":
-    post_text = generate_post_content()
-    print("Generated Post Text Preview:", post_text[:100])
-    
-    # Send draft to Telegram
-    send_telegram_message(f"📝 *New LinkedIn Post Generated:*\n\n{post_text}")
-    
-    # Post to LinkedIn
-    post_to_linkedin(post_text)
+    text = generate()
+    if not text:
+        tg("Gemini failed. Nothing posted today.")
+        sys.exit(1)
+    tg("New LinkedIn post draft:\n\n" + text)
+    if DRY_RUN:
+        print("DRY RUN: not posting to LinkedIn")
+    elif not post_linkedin(text):
+        tg("LinkedIn post FAILED. Check token or URN.")
+        sys.exit(1)
