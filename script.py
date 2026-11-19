@@ -1,4 +1,4 @@
-import os, sys, datetime, requests
+import os, sys, time, datetime, requests
 
 TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TG_CHAT = os.environ.get("TELEGRAM_CHAT_ID")
@@ -6,6 +6,8 @@ GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
 LI_TOKEN = os.environ.get("LINKEDIN_ACCESS_TOKEN")
 AUTHOR_URN = os.environ.get("AUTHOR_URN")
 DRY_RUN = os.environ.get("DRY_RUN") == "1"
+
+GEMINI_MODEL = "gemini-3.8-flash"
 
 TOPICS = [
     "a practical career guidance tip for freshers",
@@ -39,22 +41,28 @@ def generate():
         "Practical, warm tone. End with one question for readers. "
         "No markdown symbols like ** or #, max 3 hashtags at the end."
     )
-    try:
-        r = requests.post(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
-            headers={"x-goog-api-key": GEMINI_KEY},
-            json={"contents": [{"parts": [{"text": prompt}]}]},
-            timeout=60,
-        )
-        print("Gemini status:", r.status_code)
-        if r.status_code != 200:
-            print(r.text[:300])
-            return None
-        text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
-        return text.replace("**", "").strip() or None
-    except Exception as e:
-        print("Gemini failed:", type(e).__name__)
-        return None
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
+    for attempt in range(1, 4):
+        try:
+            r = requests.post(
+                url,
+                headers={"x-goog-api-key": GEMINI_KEY},
+                json={"contents": [{"parts": [{"text": prompt}]}]},
+                timeout=150,
+            )
+            print(f"Gemini attempt {attempt} status:", r.status_code)
+            if r.status_code == 200:
+                text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+                text = text.replace("**", "").strip()
+                if text:
+                    return text
+                print("Gemini returned empty text")
+            else:
+                print(r.text[:300])
+        except Exception as e:
+            print(f"Gemini attempt {attempt} failed:", type(e).__name__)
+        time.sleep(10)
+    return None
 
 def post_linkedin(text):
     if not LI_TOKEN or not AUTHOR_URN:
