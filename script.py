@@ -1,4 +1,4 @@
-import os, sys, json, time, datetime, base64, requests
+import os, re, sys, json, time, datetime, base64, requests
 
 TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TG_CHAT = os.environ.get("TELEGRAM_CHAT_ID")
@@ -20,7 +20,7 @@ GEMINI_MODELS = [
 
 ACTIVE = ("pending", "awaiting_notes", "awaiting_edit", "awaiting_suggest", "awaiting_image")
 
-# Sirf wahi facts likho jo sach hain. AI "I" yahin se lega.
+# Sirf wahi facts likho jo sach hain. AI inhe sirf jaise likhe hain waise hi use karega.
 PROFILE = """
 - Data analyst by background (BBA plus a Post Graduate Program in Data Science and ML).
 - Was the first dedicated data hire at an F&B chain with 25+ outlets and built its reporting from scratch, mostly in Google Sheets.
@@ -30,8 +30,10 @@ PROFILE = """
 """
 
 LANG_RULES = {
-    "en": "Write in simple, clear English.",
-    "hi": "Write in natural Hinglish: Hindi written in Roman script mixed with English words, the way urban Indian professionals talk. Keep technical words in English.",
+    "en": "Write in clear, professional English. Simple words, short sentences.",
+    "mix": ("Write in clear, professional English as the base. You may add at most one or two short, "
+            "natural Hindi phrases in Roman script (for example in the closing line), only where it feels warm. "
+            "Never write full Hindi sentences, never use slang or casual fillers like 'yaar' or 'bhai'."),
 }
 
 # weekday: 0 = Monday ... 6 = Sunday
@@ -54,26 +56,60 @@ PILLARS = {
         "why a simple report beats a fancy dashboard",
         "how messy data teaches you to ask better questions",
     ]),
-    3: ("Job hunt reality for freshers", "hi", [
+    3: ("Job hunt reality for freshers", "mix", [
         "how to follow up politely after applying",
         "what to do when applications get no replies",
         "how to prepare for a business case question in a BA interview",
         "how to explain a career switch honestly in an interview",
     ]),
-    4: ("Myth vs reality in data and analyst careers", "hi", [
+    4: ("Myth vs reality in data and analyst careers", "mix", [
         "myth: you must be a coding expert to become a Business Analyst",
         "myth: only an MBA or a top college gets you a good analyst job",
         "myth: more certificates means more job offers",
         "myth: you need a perfect resume to start applying",
     ]),
-    5: ("Personal update: job search and portfolio", "hi", []),
-    6: ("Weekend discussion", "hi", [
+    5: ("Personal update: job search and portfolio", "mix", []),
+    6: ("Weekend discussion", "mix", [
         "ask the community what helped them most in their career this year",
         "ask which skill people are learning right now and why",
         "ask what advice they wish they got as a fresher",
         "ask what they would tell their younger self about work",
     ]),
 }
+
+FORMAT_RULES = """FORMAT (follow exactly, plain text only):
+Line 1: the hook (under 12 words).
+(blank line)
+1 to 2 short lines of context.
+(blank line)
+If the post has steps or points: put each one on its own line as 1) 2) 3), with a blank line before the list.
+(blank line)
+A short takeaway of 1 to 2 lines.
+(blank line)
+One genuine question for the readers.
+(blank line)
+Exactly 3 relevant hashtags on one single last line.
+
+Never put every sentence on its own line. Each paragraph is at most 2 short lines.
+No markdown: no asterisks, no headings, no bullet symbols."""
+
+TONE_RULES = """TONE: a thoughtful working professional sharing something useful. Calm, specific, respectful. Not an influencer.
+Avoid phrases like: game-changer, brutal truth, let that sink in, unlock, dive deep, in today's fast-paced world.
+No emojis."""
+
+# ---------------- formatting helper ----------------
+
+def format_post(text):
+    text = text.replace("\r\n", "\n").replace("**", "").replace("__", "")
+    text = re.sub(r"^\s*[\*\-•]\s+", "", text, flags=re.M)
+    text = re.sub(r"[ \t]+\n", "\n", text)
+    text = re.sub(r"(?<=\S)[ \t]+(?=\d\) )", "\n", text)       # inline steps -> separate lines
+    text = re.sub(r"([^\n])\n(1\) )", r"\1\n\n\2", text)        # blank line before list
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
+    parts = text.rsplit("\n", 1)                                 # hashtags on own last line
+    if len(parts) == 2 and parts[1].lstrip().startswith("#") and not parts[0].endswith("\n"):
+        text = parts[0].rstrip() + "\n\n" + parts[1].strip()
+    return text
 
 # ---------------- state ----------------
 
@@ -171,7 +207,7 @@ def gemini_text(prompt, min_words=70, max_words=230):
                 print(f"[{model}] attempt {attempt} status:", r.status_code)
                 if r.status_code == 200:
                     text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
-                    text = text.replace("**", "").strip()
+                    text = format_post(text)
                     words = len(text.split())
                     if min_words <= words <= max_words:
                         print(f"Used model: {model}, words: {words}")
@@ -193,36 +229,37 @@ def gemini_text(prompt, min_words=70, max_words=230):
 def build_prompt(pillar, angle, lang):
     return f"""You are ghostwriting a LinkedIn post for a creator who gives practical career and data guidance to freshers and small business people in India.
 
-ABOUT THE CREATOR (real facts; use only these if you write in first person):
+CREATOR FACTS (background only; never expand or embellish them):
 {PROFILE}
 
 LANGUAGE: {LANG_RULES[lang]}
+{TONE_RULES}
+
 TODAY'S PILLAR: {pillar}
 TODAY'S ANGLE: {angle}
 
-RULES:
-- 110 to 170 words.
-- Line 1 is a hook under 12 words: a specific, concrete claim or question. No cliches like "brutal truth", "game-changer" or "let that sink in".
-- Write natural short paragraphs of 1 to 3 sentences. Do not put every sentence on its own line.
+{FORMAT_RULES}
+
+CONTENT RULES:
+- 110 to 170 words in total.
+- Speak to the reader as "you". Do not write "I" at all.
+- Do NOT write experience claims such as "I saw", "I noticed", "I learned" or "in my experience". Do NOT invent stories, numbers, clients or results.
+- You may mention one creator fact exactly as written, at most once, only if it truly fits. It is optional.
 - Include one concrete example, step or mini-scenario the reader can use today.
-- Do NOT invent personal stories, numbers, clients or results. If you use "I", it must come from the creator facts above. Otherwise speak to the reader as "you".
-- Warm, conversational tone with simple words. At most one emoji.
-- End the body with one genuine question that invites discussion.
-- Final line: exactly 3 relevant hashtags about data, careers or the topic. Never use #Entrepreneurship or #Startups.
-- No markdown: no asterisks, no headings, no bullet symbols. If you list steps, use 1) 2) 3).
 Output only the post text."""
 
 def polish_notes(notes, lang):
     prompt = f"""Turn the creator's own notes into a LinkedIn post.
 
 LANGUAGE: {LANG_RULES[lang]}
-RULES:
+{TONE_RULES}
+
+{FORMAT_RULES}
+
+CONTENT RULES:
 - Use ONLY facts present in the notes. Do not invent details, numbers, names, companies or outcomes.
-- First person is allowed because these are the creator's own notes.
-- 80 to 150 words. Hook in line 1 under 12 words. Short natural paragraphs.
-- End the body with one genuine question for readers.
-- Final line: exactly 3 relevant hashtags.
-- No markdown symbols, at most one emoji.
+- First person is allowed because these are the creator's own notes. Fix grammar and make it clear.
+- 80 to 150 words in total.
 
 NOTES:
 {notes}
@@ -232,10 +269,12 @@ Output only the post text."""
 
 def revise_text(current, instruction):
     prompt = f"""Edit this LinkedIn post according to the instruction.
-Keep the same language style as the post unless the instruction says otherwise.
-Do not invent personal stories, numbers or results. No markdown symbols. Keep 3 hashtags on the last line.
+Keep it professional, keep the same language style, and keep the format below.
+Do not invent personal stories, numbers or results.
 
 INSTRUCTION: {instruction}
+
+{FORMAT_RULES}
 
 POST:
 {current}
@@ -404,7 +443,7 @@ def handle_message(s, m):
         return
     if status == "awaiting_notes" and text:
         say("Notes mil gaye, post bana rahi hu...")
-        new = polish_notes(text, s.get("lang", "hi"))
+        new = polish_notes(text, s.get("lang", "mix"))
         if not new:
             say("Post nahi ban payi. Notes dobara bhejo.")
             return
