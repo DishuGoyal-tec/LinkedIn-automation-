@@ -5,6 +5,11 @@
  "pillar": "Myth vs reality in data and analyst careers",
  "angle": "myth: you need a perfect resume to start applying",
  "lang": "mix",
- "text": "Waiting for a perfect resume usually delays your career start.\n\nMany freshers assume every line must look flawless before submitting applications.\n\n1) List the core projects you built using Google Sheets or SQL.\n2) Focus on the business questions your analysis helped answer.\n3) Keep the formatting clean and readable without extra clutter.\n\nClear logic and practical business thinking matter far more than polished layout templates.\n\nWhich skill on your resume needs a clearer business focus today?\n\n#DataAnalyst #CareerAdvice #FreshersJobs",
- "image_file_id": null
+ "text": "Myth: You need a perfect resume to start applying for jobs.\n\nReality: Hiring managers care more about basic technical competence than a polished template.\n\nFrom the interviews I have given, I learned that you do not need to be an expert in ML or deep learning to get placed.\n\nWhat matters is being smooth with basic Excel formulas, knowing SQL basics and being able to write queries, and using Power BI.\n\nExample: A candidate with a simple single-page resume received three interview calls after demonstrating a VLOOKUP and a basic SELECT query.\n\n1) List three core tools like Google Sheets, SQL, and Power BI clearly.\n\n2) Add one project showing a simple query or pivot table.\n\n3) Send out applications once these basics are on paper.\n\nTry this today:\nOpen an old spreadsheet, write down three formulas you actually understand, and put them on your resume.\n\nHow many job applications do you send before tailoring your resume?\n\n#DataAnalyst #CareerAdvice #Freshers",
+ "image_file_id": null,
+ "style": "myth",
+ "used_story": true,
+ "used_stories": [
+  "From the interviews I have given, I learned that y"
+ ]
 }
