@@ -8,6 +8,7 @@ AUTHOR_URN = os.environ.get("AUTHOR_URN")
 DRY_RUN = os.environ.get("DRY_RUN") == "1"
 
 STATE_FILE = "state.json"
+STORIES_FILE = "stories.txt"
 TG_API = f"https://api.telegram.org/bot{TG_TOKEN}"
 IST = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
 GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta"
@@ -20,7 +21,7 @@ GEMINI_MODELS = [
 
 ACTIVE = ("pending", "awaiting_notes", "awaiting_edit", "awaiting_suggest", "awaiting_image")
 
-# Sirf wahi facts likho jo sach hain. AI inhe sirf jaise likhe hain waise hi use karega.
+# Sirf wahi facts likho jo sach hain.
 PROFILE = """
 - Data analyst by background (BBA plus a Post Graduate Program in Data Science and ML).
 - Was the first dedicated data hire at an F&B chain with 25+ outlets and built its reporting from scratch, mostly in Google Sheets.
@@ -36,40 +37,46 @@ LANG_RULES = {
             "Never write full Hindi sentences, never use slang or casual fillers like 'yaar' or 'bhai'."),
 }
 
-# weekday: 0 = Monday ... 6 = Sunday
+# weekday: (pillar, language, style, story tags, angles)   0 = Monday ... 6 = Sunday
 PILLARS = {
-    0: ("Business Analyst career guidance for freshers from non-tech backgrounds", "en", [
+    0: ("Business Analyst career guidance for freshers from non-tech backgrounds", "en", "tutorial",
+        ["career", "job", "general"], [
         "what a Business Analyst actually does in a normal work day",
         "how to read a Data/Business Analyst job description and spot what really matters",
         "the first 3 skills to learn for a BA role, in order",
         "how to turn a college or course project into a strong resume line",
     ]),
-    1: ("Practical tool tip (Google Sheets, Excel, SQL)", "en", [
-        "one Google Sheets formula that saves time, with a tiny example",
-        "a beginner SQL pattern (like GROUP BY) explained with a simple example",
-        "a common data cleaning mistake and how to fix it",
+    1: ("Practical tool tip (Google Sheets, Excel, SQL)", "en", "tutorial",
+        ["tool", "sql", "mistake", "general"], [
+        "one Google Sheets formula that saves time, with a tiny worked example",
+        "a beginner SQL pattern (like GROUP BY) explained with a small example table",
+        "a common data cleaning mistake and how to fix it step by step",
         "one habit that makes a report easy for a manager to read",
     ]),
-    2: ("F&B plus data: lessons from business reporting", "en", [
+    2: ("F&B plus data: lessons from business reporting", "en", "story",
+        ["fnb", "mistake", "general"], [
         "why daily sales numbers mislead without context",
         "what a small cafe or restaurant should track every day",
         "why a simple report beats a fancy dashboard",
         "how messy data teaches you to ask better questions",
     ]),
-    3: ("Job hunt reality for freshers", "mix", [
+    3: ("Job hunt reality for freshers", "mix", "story",
+        ["job", "mistake", "career", "general"], [
         "how to follow up politely after applying",
         "what to do when applications get no replies",
         "how to prepare for a business case question in a BA interview",
         "how to explain a career switch honestly in an interview",
     ]),
-    4: ("Myth vs reality in data and analyst careers", "mix", [
+    4: ("Myth vs reality in data and analyst careers", "mix", "myth",
+        ["career", "job", "mistake", "general"], [
         "myth: you must be a coding expert to become a Business Analyst",
         "myth: only an MBA or a top college gets you a good analyst job",
         "myth: more certificates means more job offers",
         "myth: you need a perfect resume to start applying",
     ]),
-    5: ("Personal update: job search and portfolio", "mix", []),
-    6: ("Weekend discussion", "mix", [
+    5: ("Personal update: job search and portfolio", "mix", "notes", [], []),
+    6: ("Weekend discussion", "mix", "discussion",
+        ["career", "job", "general"], [
         "ask the community what helped them most in their career this year",
         "ask which skill people are learning right now and why",
         "ask what advice they wish they got as a fresher",
@@ -77,21 +84,43 @@ PILLARS = {
     ]),
 }
 
-FORMAT_RULES = """FORMAT (follow exactly, plain text only):
-Line 1: the hook (under 12 words).
-(blank line)
-1 to 2 short lines of context.
-(blank line)
-If the post has steps or points: put each one on its own line as 1) 2) 3), with a blank line before the list.
-(blank line)
-A short takeaway of 1 to 2 lines.
-(blank line)
-One genuine question for the readers.
-(blank line)
-Exactly 3 relevant hashtags on one single last line.
+BLUEPRINTS = {
+    "tutorial": """STYLE: Mini tutorial. Build the post in this order:
+- Hook: the problem or a specific scenario in one line.
+- A concrete scenario with specific details (for example a cafe's daily sales, a small table, a job application).
+- A named formula, function or method that solves it (for example Sales = customers x average bill, a Sheets function, GROUP BY), with a tiny worked example using concrete numbers.
+- 3 short numbered steps the reader can follow.
+- One common mistake to avoid.
+- A line starting with "Try this today:" giving one small 10-minute exercise.
+- A closing question.""",
+    "story": """STYLE: Story plus lesson. Build the post in this order:
+- Hook taken from the real moment.
+- Tell the real moment in 3 to 4 plain sentences: the situation, what was done, what happened. Use ONLY what is in the real moment.
+- The lesson as 2 or 3 numbered takeaways the reader can apply, each with a concrete detail.
+- A line starting with "Try this today:" giving one small action.
+- A closing question.""",
+    "myth": """STYLE: Myth-busting with an example. Build the post in this order:
+- Hook starting with "Myth:" and the myth.
+- One line starting with "Reality:".
+- A concrete example or mini-scenario that proves it, with numbers, named tools or a named method.
+- What to do instead as 3 short numbered steps.
+- A line starting with "Try this today:" giving one small action.
+- A closing question.""",
+    "discussion": """STYLE: Insight plus discussion. Build the post in this order:
+- Hook: a specific observation or question.
+- One useful insight in 3 to 4 lines, with a concrete example.
+- 2 or 3 numbered options or prompts the readers can answer with.
+- A closing question that is easy to answer in one line.""",
+}
 
-Never put every sentence on its own line. Each paragraph is at most 2 short lines.
-No markdown: no asterisks, no headings, no bullet symbols."""
+FORMAT_RULES = """FORMAT (plain text only):
+- Line 1 is the hook, under 14 words.
+- Blank line between every block. Each paragraph is at most 2 short lines.
+- Numbered steps: each on its own line as 1) 2) 3), with a blank line before the list.
+- Labels like "Example:", "Reality:" or "Try this today:" start their own line.
+- The second last block is one genuine question for readers.
+- The last line is exactly 3 relevant hashtags.
+- No markdown: no asterisks, no headings, no bullet symbols."""
 
 TONE_RULES = """TONE: a thoughtful working professional sharing something useful. Calm, specific, respectful. Not an influencer.
 Avoid phrases like: game-changer, brutal truth, let that sink in, unlock, dive deep, in today's fast-paced world.
@@ -103,13 +132,47 @@ def format_post(text):
     text = text.replace("\r\n", "\n").replace("**", "").replace("__", "")
     text = re.sub(r"^\s*[\*\-•]\s+", "", text, flags=re.M)
     text = re.sub(r"[ \t]+\n", "\n", text)
-    text = re.sub(r"(?<=\S)[ \t]+(?=\d\) )", "\n", text)       # inline steps -> separate lines
-    text = re.sub(r"([^\n])\n(1\) )", r"\1\n\n\2", text)        # blank line before list
+    text = re.sub(r"(?<=\S)[ \t]+(?=\d\) )", "\n", text)
+    text = re.sub(r"([^\n])\n(1\) )", r"\1\n\n\2", text)
     text = re.sub(r"\n{3,}", "\n\n", text).strip()
-    parts = text.rsplit("\n", 1)                                 # hashtags on own last line
+    parts = text.rsplit("\n", 1)
     if len(parts) == 2 and parts[1].lstrip().startswith("#") and not parts[0].endswith("\n"):
         text = parts[0].rstrip() + "\n\n" + parts[1].strip()
     return text
+
+# ---------------- stories ----------------
+
+def load_stories():
+    stories = []
+    try:
+        with open(STORIES_FILE, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "|" not in line:
+                    continue
+                tag, story = line.split("|", 1)
+                tag, story = tag.strip().lower(), story.strip()
+                if len(story) >= 15:
+                    stories.append((tag, story))
+    except FileNotFoundError:
+        print("stories.txt not found, continuing without stories")
+    return stories
+
+def pick_story(tags, s):
+    if not tags:
+        return None
+    pool = [(t, x) for t, x in load_stories() if t in tags]
+    if not pool:
+        return None
+    used = s.setdefault("used_stories", [])
+    unused = [(t, x) for t, x in pool if x[:50] not in used]
+    if not unused:
+        pool_keys = [x[:50] for _, x in pool]
+        s["used_stories"] = [k for k in used if k not in pool_keys]
+        unused = pool
+    story = unused[0][1]
+    s["used_stories"].append(story[:50])
+    return story
 
 # ---------------- state ----------------
 
@@ -160,7 +223,9 @@ def send_preview(s):
     if s.get("image_file_id"):
         tg_call("sendPhoto", {"chat_id": TG_CHAT, "photo": s["image_file_id"]})
     words = len(s["text"].split())
-    header = f"📝 Draft | {s.get('pillar', '')}\n({words} words)"
+    header = f"📝 Draft | {s.get('pillar', '')}\nStyle: {s.get('style', '-')} | {words} words"
+    if s.get("used_story"):
+        header += " | real story used"
     if s.get("image_file_id"):
         header += " | 🖼 image attached"
     say(f"{header}\n\n{s['text']}", BUTTONS)
@@ -190,7 +255,7 @@ def download_telegram_file(file_id):
 
 # ---------------- gemini text ----------------
 
-def gemini_text(prompt, min_words=70, max_words=230):
+def gemini_text(prompt, min_words=150, max_words=260):
     if not GEMINI_KEY:
         print("Gemini key missing")
         return None
@@ -226,11 +291,23 @@ def gemini_text(prompt, min_words=70, max_words=230):
             time.sleep(5)
     return None
 
-def build_prompt(pillar, angle, lang):
+def story_block(story, required):
+    if not story:
+        return ("No real moment is provided. Speak to the reader as 'you'. "
+                "Do not write 'I' anywhere and do not claim any personal experience.")
+    use = ("Build the post around it." if required else
+           "Use it in 1 to 3 lines as the opening or as proof, only if it fits naturally; otherwise ignore it.")
+    return (f"REAL MOMENT FROM THE CREATOR (true; the only personal facts you may use; "
+            f"do not add any detail, number, name or outcome that is not in it; first person is allowed only for this moment). {use}\n"
+            f"{story}")
+
+def build_prompt(pillar, style, angle, lang, story):
     return f"""You are ghostwriting a LinkedIn post for a creator who gives practical career and data guidance to freshers and small business people in India.
 
-CREATOR FACTS (background only; never expand or embellish them):
+CREATOR FACTS (background only; never expand or embellish them; mention at most one, exactly as written, only if it truly fits):
 {PROFILE}
+
+{story_block(story, style == "story")}
 
 LANGUAGE: {LANG_RULES[lang]}
 {TONE_RULES}
@@ -238,15 +315,37 @@ LANGUAGE: {LANG_RULES[lang]}
 TODAY'S PILLAR: {pillar}
 TODAY'S ANGLE: {angle}
 
+{BLUEPRINTS[style]}
+
 {FORMAT_RULES}
 
 CONTENT RULES:
-- 110 to 170 words in total.
-- Speak to the reader as "you". Do not write "I" at all.
-- Do NOT write experience claims such as "I saw", "I noticed", "I learned" or "in my experience". Do NOT invent stories, numbers, clients or results.
-- You may mention one creator fact exactly as written, at most once, only if it truly fits. It is optional.
-- Include one concrete example, step or mini-scenario the reader can use today.
+- Length: around 200 words (between 170 and 230).
+- The post must be genuinely useful: include at least one concrete example with specific numbers, a named formula, function, query or tool. No generic advice like "stay consistent" or "believe in yourself" unless made concrete.
+- Illustrative examples are fine, but label them "Example:" and never present them as something that happened to the creator. Do not invent clients, companies, names or results.
+- Every sentence should add information. No filler, no repeating the hook.
 Output only the post text."""
+
+def quality_pass(text, style, story):
+    needs_try = style in ("tutorial", "story", "myth")
+    prompt = f"""You are a strict LinkedIn editor. Check the post below against this checklist:
+1) The hook is specific and under 14 words.
+2) It has at least one concrete example, formula, function or tool with specifics (numbers, names).
+3) It has numbered steps or points, each on its own line.
+4) {"It has a line starting with 'Try this today:' with one small action." if needs_try else "It ends with an easy-to-answer question."}
+5) It is between 170 and 230 words.
+6) No generic advice, no cliches, no invented claims, no personal experience claims beyond the real moment.
+7) It follows the format rules.
+
+{FORMAT_RULES}
+
+{story_block(story, style == "story")}
+
+If every item passes, output the post unchanged. Otherwise rewrite it to fix the failures, keeping the same topic and facts. Output only the post text.
+
+POST:
+{text}"""
+    return gemini_text(prompt, 150, 260)
 
 def polish_notes(notes, lang):
     prompt = f"""Turn the creator's own notes into a LinkedIn post.
@@ -259,18 +358,19 @@ LANGUAGE: {LANG_RULES[lang]}
 CONTENT RULES:
 - Use ONLY facts present in the notes. Do not invent details, numbers, names, companies or outcomes.
 - First person is allowed because these are the creator's own notes. Fix grammar and make it clear.
-- 80 to 150 words in total.
+- Where possible, turn the notes into one useful takeaway for the reader, using only what the notes support.
+- 120 to 200 words in total.
 
 NOTES:
 {notes}
 
 Output only the post text."""
-    return gemini_text(prompt, 40, 220)
+    return gemini_text(prompt, 60, 240)
 
 def revise_text(current, instruction):
     prompt = f"""Edit this LinkedIn post according to the instruction.
 Keep it professional, keep the same language style, and keep the format below.
-Do not invent personal stories, numbers or results.
+Do not invent personal stories, numbers or results. Keep it concrete and useful.
 
 INSTRUCTION: {instruction}
 
@@ -280,7 +380,7 @@ POST:
 {current}
 
 Output only the final post text."""
-    return gemini_text(prompt, 30, 280)
+    return gemini_text(prompt, 40, 300)
 
 # ---------------- gemini image (optional) ----------------
 
@@ -443,7 +543,7 @@ def handle_message(s, m):
         return
     if status == "awaiting_notes" and text:
         say("Notes mil gaye, post bana rahi hu...")
-        new = polish_notes(text, s.get("lang", "mix"))
+        new = polish_notes(text, s.get("lang", "mix") if s.get("lang") in LANG_RULES else "mix")
         if not new:
             say("Post nahi ban payi. Notes dobara bhejo.")
             return
@@ -483,18 +583,26 @@ def cmd_generate():
             s["offset"] = res[-1]["update_id"] + 1
     now = datetime.datetime.now(IST)
     weekday = int(os.environ.get("TEST_WEEKDAY") or now.weekday())
-    pillar, lang, angles = PILLARS[weekday]
+    pillar, lang, style, tags, angles = PILLARS[weekday]
     angle = angles[now.isocalendar()[1] % len(angles)] if angles else ""
     s.update({"date": now.strftime("%Y-%m-%d"), "pillar": pillar, "angle": angle,
-              "lang": lang, "text": "", "image_file_id": None})
-    if weekday == 5:
+              "lang": lang, "style": style, "text": "", "image_file_id": None, "used_story": False})
+    if style == "notes":
         s["status"] = "awaiting_notes"
         save_state(s)
         say("🗓 Aaj Saturday hai, personal update ka din.\n\n"
             "Job search ya portfolio ka kya update hai? 3-5 lines mein notes bhejo "
             "(Hinglish chalega). Main unhe sirf polish karungi, kuch nayi cheez nahi jodungi.")
         return
-    text = gemini_text(build_prompt(pillar, angle, lang))
+    story = pick_story(tags, s)
+    if style == "story" and not story:
+        style = "tutorial"
+        s["style"] = style
+    s["used_story"] = bool(story)
+    text = gemini_text(build_prompt(pillar, style, angle, lang, story))
+    if text:
+        improved = quality_pass(text, style, story)
+        text = improved or text
     if not text:
         s["status"] = "idle"
         save_state(s)
