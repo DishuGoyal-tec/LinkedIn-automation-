@@ -1,12 +1,12 @@
 {
- "offset": 901335704,
+ "offset": 901335708,
  "status": "pending",
  "date": "2026-11-20",
  "pillar": "Myth vs reality in data and analyst careers",
  "angle": "myth: you need a perfect resume to start applying",
  "lang": "mix",
- "text": "Myth: You need a perfect resume to start applying for jobs.\n\nReality: Hiring managers care more about basic technical competence than a polished template.\n\nFrom the interviews I have given, I learned that you do not need to be an expert in ML or deep learning to get placed.\n\nWhat matters is being smooth with basic Excel formulas, knowing SQL basics and being able to write queries, and using Power BI.\n\nExample: A candidate with a simple single-page resume received three interview calls after demonstrating a VLOOKUP and a basic SELECT query.\n\n1) List three core tools like Google Sheets, SQL, and Power BI clearly.\n\n2) Add one project showing a simple query or pivot table.\n\n3) Send out applications once these basics are on paper.\n\nTry this today:\nOpen an old spreadsheet, write down three formulas you actually understand, and put them on your resume.\n\nHow many job applications do you send before tailoring your resume?\n\n#DataAnalyst #CareerAdvice #Freshers",
- "image_file_id": null,
+ "text": "If Yur're targeting entry level roles of Data Analyst , so should try these formulas of excel:\nLookup function , Match-Index , Ifs , Sum ,Count ,Trim",
+ "image_file_id": "AgACAgUAAxkBAAMcawABJMPwpqc_1DzeFyDp3QHmFR26AALVFWsbfhgAAVRcykmT4UgZdwEAAwIAA3kAAz0E",
  "style": "myth",
  "used_story": true,
  "used_stories": [
