@@ -19,7 +19,11 @@ GEMINI_MODELS = [
     "gemini-flash-lite-latest",
 ]
 
-ACTIVE = ("pending", "awaiting_notes", "awaiting_edit", "awaiting_suggest", "awaiting_image")
+ACTIVE = ("pending", "scheduled", "awaiting_notes", "awaiting_edit", "awaiting_suggest", "awaiting_image")
+
+# Approve dabane par post is time par jayegi (IST). Window: POST_HOUR:00 se 30 min.
+POST_HOUR = 11
+LATE_LIMIT_HOURS = 3
 
 # Sirf wahi facts likho jo sach hain.
 PROFILE = """
@@ -37,45 +41,39 @@ LANG_RULES = {
             "Never write full Hindi sentences, never use slang or casual fillers like 'yaar' or 'bhai'."),
 }
 
-# weekday: (pillar, language, style, story tags, angles)   0 = Monday ... 6 = Sunday
+# weekday: (pillar, language, [styles that rotate week by week], story tags, angles)   0 = Monday ... 6 = Sunday
 PILLARS = {
-    0: ("Business Analyst career guidance for freshers from non-tech backgrounds", "en", "tutorial",
+    0: ("Business Analyst career guidance for freshers from non-tech backgrounds", "en", ["tutorial", "opinion"],
         ["career", "job", "general"], [
         "what a Business Analyst actually does in a normal work day",
         "how to read a Data/Business Analyst job description and spot what really matters",
         "the first 3 skills to learn for a BA role, in order",
         "how to turn a college or course project into a strong resume line",
     ]),
-    1: ("Practical tool tip (Google Sheets, Excel, SQL)", "en", "tutorial",
-        ["tool", "sql", "mistake", "general"], [
+    1: ("Practical tool tip (Google Sheets, Excel, SQL)", "en", ["tutorial"],
+        ["tool", "sql", "fnb", "mistake", "general"], [
         "one Google Sheets formula that saves time, with a tiny worked example",
         "a beginner SQL pattern (like GROUP BY) explained with a small example table",
         "a common data cleaning mistake and how to fix it step by step",
         "one habit that makes a report easy for a manager to read",
     ]),
-    2: ("F&B plus data: lessons from business reporting", "en", "story",
-        ["fnb", "mistake", "general"], [
-        "why daily sales numbers mislead without context",
-        "what a small cafe or restaurant should track every day",
-        "why a simple report beats a fancy dashboard",
-        "how messy data teaches you to ask better questions",
-    ]),
-    3: ("Job hunt reality for freshers", "mix", "story",
-        ["job", "mistake", "career", "general"], [
+    2: ("Project breakdown from real work", "en", ["project"], [], []),
+    3: ("Job hunt reality for freshers", "mix", ["story", "mistake"],
+        ["job", "mistake", "career", "fnb", "general"], [
         "how to follow up politely after applying",
         "what to do when applications get no replies",
         "how to prepare for a business case question in a BA interview",
         "how to explain a career switch honestly in an interview",
     ]),
-    4: ("Myth vs reality in data and analyst careers", "mix", "myth",
+    4: ("Myth vs reality, and real work", "mix", ["myth", "project"],
         ["career", "job", "mistake", "general"], [
         "myth: you must be a coding expert to become a Business Analyst",
         "myth: only an MBA or a top college gets you a good analyst job",
         "myth: more certificates means more job offers",
         "myth: you need a perfect resume to start applying",
     ]),
-    5: ("Personal update: job search and portfolio", "mix", "notes", [], []),
-    6: ("Weekend discussion", "mix", "discussion",
+    5: ("Personal update: job search and portfolio", "mix", ["notes"], [], []),
+    6: ("Weekend discussion", "mix", ["discussion"],
         ["career", "job", "general"], [
         "ask the community what helped them most in their career this year",
         "ask which skill people are learning right now and why",
@@ -91,36 +89,70 @@ BLUEPRINTS = {
 - A named formula, function or method that solves it (for example Sales = customers x average bill, a Sheets function, GROUP BY), with a tiny worked example using concrete numbers.
 - 3 short numbered steps the reader can follow.
 - One common mistake to avoid.
-- A line starting with "Try this today:" giving one small 10-minute exercise.
-- A closing question.""",
+- A line starting with "Try this today:" giving one small 10-minute exercise.""",
     "story": """STYLE: Story plus lesson. Build the post in this order:
 - Hook taken from the real moment.
 - Tell the real moment in 3 to 4 plain sentences: the situation, what was done, what happened. Use ONLY what is in the real moment.
 - The lesson as 2 or 3 numbered takeaways the reader can apply, each with a concrete detail.
-- A line starting with "Try this today:" giving one small action.
-- A closing question.""",
+- A line starting with "Try this today:" giving one small action.""",
     "myth": """STYLE: Myth-busting with an example. Build the post in this order:
 - Hook starting with "Myth:" and the myth.
 - One line starting with "Reality:".
 - A concrete example or mini-scenario that proves it, with numbers, named tools or a named method.
 - What to do instead as 3 short numbered steps.
-- A line starting with "Try this today:" giving one small action.
-- A closing question.""",
+- A line starting with "Try this today:" giving one small action.""",
     "discussion": """STYLE: Insight plus discussion. Build the post in this order:
 - Hook: a specific observation or question.
 - One useful insight in 3 to 4 lines, with a concrete example.
-- 2 or 3 numbered options or prompts the readers can answer with.
-- A closing question that is easy to answer in one line.""",
+- 2 or 3 numbered options or prompts the readers can answer with.""",
+    "opinion": """STYLE: Clear opinion. Build the post in this order:
+- Hook: one direct, specific stance in a single line, something a thoughtful practitioner would defend.
+- Why, in 2 or 3 short lines, with one concrete example, number or named tool.
+- The fair counterpoint: when the opposite view is right, in 1 or 2 lines.
+- What the reader should do next, in one line.""",
+    "mistake": """STYLE: Mistake to fix. Build the post in this order:
+- Hook naming the mistake in plain words.
+- What it looks like in practice, with a concrete example (use the real moment only if one is provided; otherwise a clearly labelled illustrative example).
+- Why it hurts, in 1 or 2 lines.
+- The fix as 3 short numbered steps.
+- A line starting with "Try this today:" giving one small action.""",
+    "project": """STYLE: Project breakdown. Build the post ONLY from the PROJECT FACTS provided. Order:
+- Hook: the business question, or the most striking real finding from the facts.
+- The problem in 1 or 2 lines.
+- What was built or analysed (data and tools), in 2 lines, only from the facts.
+- 2 or 3 numbered findings or decisions, only from the facts.
+- One honest limit or lesson, only if the facts contain one; otherwise one lesson about the method.
+- Invite readers to ask about the project or tell how they would approach it.""",
 }
 
-FORMAT_RULES = """FORMAT (plain text only):
+NEEDS_TRY = ("tutorial", "story", "myth", "mistake")
+
+HOOKS = [
+    "Open with a specific number or concrete result.",
+    "Open with a direct, slightly contrarian statement.",
+    "Open with a one-line generic scenario about a fresher or an analyst (third person or 'you'; never invent facts about the creator).",
+    "Open with a direct question to the reader.",
+    "Open with a plain statement of a common mistake.",
+]
+
+ENDINGS = {
+    "question": "End the body with one genuine question for readers.",
+    "takeaway": "End the body with one short, memorable takeaway line (no question).",
+    "invite": "End the body by inviting readers to share their own example or experience in the comments.",
+}
+ENDING_ROTATION = ["question", "takeaway", "question", "invite"]
+
+def format_rules(ending="question"):
+    return f"""FORMAT (plain text only):
 - Line 1 is the hook, under 14 words.
 - Blank line between every block. Each paragraph is at most 2 short lines.
-- Numbered steps: each on its own line as 1) 2) 3), with a blank line before the list.
+- Numbered steps or findings: each on its own line as 1) 2) 3), with a blank line before the list.
 - Labels like "Example:", "Reality:" or "Try this today:" start their own line.
-- The second last block is one genuine question for readers.
+- {ENDINGS[ending]} This is the second last block.
 - The last line is exactly 3 relevant hashtags.
 - No markdown: no asterisks, no headings, no bullet symbols."""
+
+FORMAT_RULES = format_rules("question")
 
 TONE_RULES = """TONE: a thoughtful working professional sharing something useful. Calm, specific, respectful. Not an influencer.
 Avoid phrases like: game-changer, brutal truth, let that sink in, unlock, dive deep, in today's fast-paced world.
@@ -174,6 +206,39 @@ def pick_story(tags, s):
     s["used_stories"].append(story[:50])
     return story
 
+# ---------------- projects ----------------
+
+PROJECTS_FILE = "projects.txt"
+
+def load_projects():
+    items = []
+    try:
+        with open(PROJECTS_FILE, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "|" not in line:
+                    continue
+                name, facts = line.split("|", 1)
+                name, facts = name.strip(), facts.strip()
+                if len(facts) >= 30:
+                    items.append(f"{name}: {facts}")
+    except FileNotFoundError:
+        print("projects.txt not found, continuing without projects")
+    return items
+
+def pick_project(s):
+    projects = load_projects()
+    if not projects:
+        return None
+    used = s.setdefault("used_projects", [])
+    unused = [p for p in projects if p[:40] not in used]
+    if not unused:
+        s["used_projects"] = []
+        unused = projects
+    project = unused[0]
+    s["used_projects"].append(project[:40])
+    return project
+
 # ---------------- state ----------------
 
 def load_state():
@@ -210,13 +275,14 @@ def say(text, markup=None):
     return tg_call("sendMessage", payload)
 
 BUTTONS = {"inline_keyboard": [
-    [{"text": "✅ Approve & Post", "callback_data": "approve"},
-     {"text": "❌ Skip today", "callback_data": "decline"}],
+    [{"text": "✅ Approve (post 11 AM)", "callback_data": "approve"},
+     {"text": "⚡ Post now", "callback_data": "post_now"}],
     [{"text": "✏️ Edit text", "callback_data": "edit"},
      {"text": "💡 Suggest change", "callback_data": "suggest"}],
     [{"text": "🖼 Add my image", "callback_data": "img_own"},
      {"text": "🎨 AI image", "callback_data": "img_ai"}],
-    [{"text": "🗑 Remove image", "callback_data": "img_none"}],
+    [{"text": "🗑 Remove image", "callback_data": "img_none"},
+     {"text": "❌ Skip today", "callback_data": "decline"}],
 ]}
 
 def send_preview(s):
@@ -226,8 +292,12 @@ def send_preview(s):
     header = f"📝 Draft | {s.get('pillar', '')}\nStyle: {s.get('style', '-')} | {words} words"
     if s.get("used_story"):
         header += " | real story used"
+    if s.get("used_project"):
+        header += " | real project used"
     if s.get("image_file_id"):
         header += " | 🖼 image attached"
+    if s.get("style") == "project" and not s.get("image_file_id"):
+        header += "\n📸 Tip: is project ka screenshot lagao (🖼 Add my image)"
     say(f"{header}\n\n{s['text']}", BUTTONS)
 
 def get_updates(offset):
@@ -301,23 +371,31 @@ def story_block(story, required):
             f"do not add any detail, number, name or outcome that is not in it; first person is allowed only for this moment). {use}\n"
             f"{story}")
 
-def build_prompt(pillar, style, angle, lang, story):
+def material_block(style, story, project):
+    if style == "project":
+        return ("PROJECT FACTS (true, from the creator's own project; these are the ONLY facts you may use; "
+                "first person 'I' is allowed because it is the creator's own work; do not add any number, "
+                "finding, tool, name or outcome that is not listed here):\n" + project)
+    return story_block(story, style == "story")
+
+def build_prompt(pillar, style, angle, lang, story, project, hook, ending):
+    hook_rule = "" if style in ("myth", "discussion") else f"HOOK STYLE: {hook}\n"
+    angle_line = f"TODAY'S ANGLE: {angle}\n" if (angle and style != "project") else ""
     return f"""You are ghostwriting a LinkedIn post for a creator who gives practical career and data guidance to freshers and small business people in India.
 
 CREATOR FACTS (background only; never expand or embellish them; mention at most one, exactly as written, only if it truly fits):
 {PROFILE}
 
-{story_block(story, style == "story")}
+{material_block(style, story, project)}
 
 LANGUAGE: {LANG_RULES[lang]}
 {TONE_RULES}
 
 TODAY'S PILLAR: {pillar}
-TODAY'S ANGLE: {angle}
-
+{angle_line}{hook_rule}
 {BLUEPRINTS[style]}
 
-{FORMAT_RULES}
+{format_rules(ending)}
 
 CONTENT RULES:
 - Length: around 200 words (between 170 and 230).
@@ -326,20 +404,23 @@ CONTENT RULES:
 - Every sentence should add information. No filler, no repeating the hook.
 Output only the post text."""
 
-def quality_pass(text, style, story):
-    needs_try = style in ("tutorial", "story", "myth")
+def quality_pass(text, style, story, project, ending):
+    last_check = ("It has a line starting with 'Try this today:' with one small action."
+                  if style in NEEDS_TRY else "It ends exactly as the ending rule in the format says.")
+    facts_check = ("8) Every number, finding and tool in the post appears in the PROJECT FACTS. Remove anything that does not.\n"
+                   if style == "project" else "")
     prompt = f"""You are a strict LinkedIn editor. Check the post below against this checklist:
 1) The hook is specific and under 14 words.
-2) It has at least one concrete example, formula, function or tool with specifics (numbers, names).
-3) It has numbered steps or points, each on its own line.
-4) {"It has a line starting with 'Try this today:' with one small action." if needs_try else "It ends with an easy-to-answer question."}
+2) It has at least one concrete example, formula, function, finding or tool with specifics (numbers, names).
+3) It has numbered steps or points, each on its own line (an opinion post may use short paragraphs instead).
+4) {last_check}
 5) It is between 170 and 230 words.
-6) No generic advice, no cliches, no invented claims, no personal experience claims beyond the real moment.
+6) No generic advice, no cliches, no invented claims, no personal experience claims beyond the real moment or project facts.
 7) It follows the format rules.
+{facts_check}
+{format_rules(ending)}
 
-{FORMAT_RULES}
-
-{story_block(story, style == "story")}
+{material_block(style, story, project)}
 
 If every item passes, output the post unchanged. Otherwise rewrite it to fix the failures, keeping the same topic and facts. Output only the post text.
 
@@ -471,26 +552,47 @@ def post_linkedin(text, asset=None):
 
 # ---------------- actions ----------------
 
+def next_slot():
+    now = datetime.datetime.now(IST)
+    slot = now.replace(hour=POST_HOUR, minute=0, second=0, microsecond=0)
+    if now < slot:
+        return slot
+    if now < slot + datetime.timedelta(minutes=30):
+        return None  # abhi window ke andar hai, turant post
+    return slot + datetime.timedelta(days=1)
+
+def post_failed(s, msg):
+    s["fail_count"] = s.get("fail_count", 0) + 1
+    if s.get("status") == "scheduled" and s["fail_count"] >= 3:
+        s["status"] = "pending"
+        s["fail_count"] = 0
+        say(msg + "\nSchedule 3 baar fail hua, isliye ruk gaya. Draft pending hai: Approve ya ⚡ Post now dabao.")
+    else:
+        say(msg)
+
 def do_post(s):
     if DRY_RUN:
+        if s.get("status") == "scheduled":
+            s["status"] = "pending"
         say("🧪 DRY RUN on hai, isliye LinkedIn par post nahi hui. Buttons ka flow test kar sakti ho.")
         return
     if not LI_TOKEN or not AUTHOR_URN:
-        say("LinkedIn token ya URN secret missing hai.")
+        post_failed(s, "LinkedIn token ya URN secret missing hai.")
         return
     asset = None
     if s.get("image_file_id"):
         img = download_telegram_file(s["image_file_id"])
         asset = li_upload_image(img) if img else None
         if not asset:
-            say("Image upload fail hua. 🗑 Remove image dabake dobara Approve karo, ya doosri image try karo.")
+            post_failed(s, "Image upload fail hua. 🗑 Remove image dabake dobara Approve karo, ya doosri image try karo.")
             return
     ok, code = post_linkedin(s["text"], asset)
     if ok:
         s["status"] = "posted"
+        s["fail_count"] = 0
         say("✅ Post LinkedIn par live ho gayi.")
     else:
-        say(f"LinkedIn post fail hui (code {code}). Draft safe hai, dobara Approve kar sakti ho. 401 ho to token expire hua hai.")
+        post_failed(s, f"LinkedIn post fail hui (code {code}). Draft safe hai. 401 ho to token expire hua hai.")
 
 def handle_callback(s, cq):
     if not from_me(cq.get("message", {}).get("chat", {}).get("id")):
@@ -500,10 +602,30 @@ def handle_callback(s, cq):
     if s.get("status") not in ACTIVE:
         say("Ye draft ab active nahi hai. Agla draft kal shaam ko aayega.")
         return
+    if s["status"] == "scheduled":
+        if data == "decline":
+            s["status"] = "declined"
+            say("Theek hai, schedule cancel. Post nahi jayegi.")
+        elif data == "post_now":
+            do_post(s)
+        else:
+            say("⏰ Post pehle se scheduled hai. Cancel karna ho to ❌ Skip today dabao, ya ⚡ Post now se abhi post karo.")
+        return
     if s["status"] == "awaiting_notes":
         say("Pehle apne notes ek message mein bhejo.")
         return
     if data == "approve":
+        slot = next_slot()
+        if slot is None:
+            do_post(s)
+        else:
+            s["status"] = "scheduled"
+            s["publish_at"] = slot.isoformat()
+            s["fail_count"] = 0
+            say(f"⏰ Scheduled: {slot.strftime('%a %d %b, %I:%M %p')} IST "
+                f"({POST_HOUR}:00 ke baad ~30 min ke andar post hogi). "
+                "Cancel karna ho to ❌ Skip today dabao.")
+    elif data == "post_now":
         do_post(s)
     elif data == "decline":
         s["status"] = "declined"
@@ -577,16 +699,26 @@ def handle_message(s, m):
 
 def cmd_generate():
     s = load_state()
+    if s.get("status") == "scheduled":
+        say("⏸ Pichli post abhi scheduled hai, isliye nayi draft nahi bana rahi. "
+            "Pehle use post ya ❌ Skip karo.")
+        return
     if not s.get("offset"):
         res = get_updates(-1)
         if res:
             s["offset"] = res[-1]["update_id"] + 1
     now = datetime.datetime.now(IST)
     weekday = int(os.environ.get("TEST_WEEKDAY") or now.weekday())
-    pillar, lang, style, tags, angles = PILLARS[weekday]
-    angle = angles[now.isocalendar()[1] % len(angles)] if angles else ""
+    pillar, lang, styles, tags, angles = PILLARS[weekday]
+    week = now.isocalendar()[1]
+    style = styles[week % len(styles)]
+    angle = angles[week % len(angles)] if angles else ""
+    ordinal = now.toordinal()
+    hook = HOOKS[ordinal % len(HOOKS)]
+    ending = "question" if style == "discussion" else ENDING_ROTATION[(ordinal + 1) % len(ENDING_ROTATION)]
     s.update({"date": now.strftime("%Y-%m-%d"), "pillar": pillar, "angle": angle,
-              "lang": lang, "style": style, "text": "", "image_file_id": None, "used_story": False})
+              "lang": lang, "style": style, "text": "", "image_file_id": None,
+              "used_story": False, "used_project": False})
     if style == "notes":
         s["status"] = "awaiting_notes"
         save_state(s)
@@ -595,13 +727,21 @@ def cmd_generate():
             "(Hinglish chalega). Main unhe sirf polish karungi, kuch nayi cheez nahi jodungi.")
         return
     story = pick_story(tags, s)
+    project = None
+    if style == "project":
+        project = pick_project(s)
+        if not project:
+            style = "tutorial"
     if style == "story" and not story:
         style = "tutorial"
-        s["style"] = style
-    s["used_story"] = bool(story)
-    text = gemini_text(build_prompt(pillar, style, angle, lang, story))
+    if style == "tutorial" and not angle:
+        angle = "one practical data analysis habit that helps freshers"
+    s["style"] = style
+    s["used_story"] = bool(story) and style != "project"
+    s["used_project"] = bool(project)
+    text = gemini_text(build_prompt(pillar, style, angle, lang, story, project, hook, ending))
     if text:
-        improved = quality_pass(text, style, story)
+        improved = quality_pass(text, style, story, project, ending)
         text = improved or text
     if not text:
         s["status"] = "idle"
@@ -624,6 +764,19 @@ def cmd_poll():
         elif "message" in u:
             handle_message(s, u["message"])
         save_state(s)
+    if s.get("status") == "scheduled":
+        try:
+            due = datetime.datetime.fromisoformat(s["publish_at"])
+        except Exception:
+            due = None
+        now = datetime.datetime.now(IST)
+        if due and now >= due:
+            if now > due + datetime.timedelta(hours=LATE_LIMIT_HOURS):
+                s["status"] = "pending"
+                say("⚠️ Scheduled time nikal gaya (GitHub late chala), isliye post nahi ki. "
+                    "Approve (agla slot) ya ⚡ Post now dabao.")
+            else:
+                do_post(s)
     save_state(s)
 
 if __name__ == "__main__":
