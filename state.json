@@ -5,13 +5,12 @@
  "pillar": "Business Analyst career guidance for freshers from non-tech backgrounds",
  "angle": "what a Business Analyst actually does in a normal work day",
  "lang": "en",
- "text": "Do you know what a Business Analyst actually does all day?\n\nExample: A local bakery sees weekday revenue drop by ten percent and needs to find out why.\n\nYou break down the drop using the formula: Revenue equals Footfall multiplied by Average Order Value.\n\nIf daily footfall is one hundred and the average bill is two hundred rupees, daily revenue is twenty thousand rupees.\n\nYou use tools like SQL or Google Sheets to find which hour of the day brings the fewest customers.\n\n1) Pull daily sales data using a basic GROUP BY query on your transaction table.\n\n2) Clean the data in Google Sheets to remove missing values and blank rows.\n\n3) Compare hourly averages to spot the exact time sales drop.\n\nA common mistake is building complex machine learning models when the business only needs basic grouping and filtering.\n\nTry this today: open a spreadsheet with fifty rows of sales data and write a formula to find the average order value.\n\nHow do you usually explain complex data findings to non-tech team members?\n\n#BusinessAnalyst #DataAnalytics #CareerGuidance",
+ "text": "Do you know what a Business Analyst actually does all day?\n\nExample: A local restaurant manager wants to know why Tuesday evening revenue dropped to 8,000 rupees last week compared to 15,000 rupees on normal Tuesdays.\n\nThe analyst uses a simple formula to break this down: Total Revenue equals Footfall multiplied by Average Order Value.\n\nIf footfall fell from 100 customers to 50, but average order value stayed at 160 rupees, the problem is customer traffic, not menu pricing.\n\nTo find this, a business analyst usually opens Google Sheets or writes a basic SQL query to filter the daily sales table by day of the week.\n\nHere is how you can practice this exact workflow today.\n\n1) Create a small table with dates, customer counts, and bill amounts.\n\n2) Calculate the average order value using a basic division formula.\n\n3) Group the rows by weekday using a pivot table to compare trends.\n\nReality: Many freshers spend weeks learning complex machine learning algorithms instead of mastering basic table aggregations.\n\nTry this today: Open a spreadsheet and calculate daily revenue totals from a sample dataset of fifty transactions using simple formulas.\n\nHow do you usually explain daily revenue drops to your team?\n\n#BusinessAnalyst #DataSkills #CareerAdvice",
  "image_file_id": null,
  "style": "tutorial",
  "used_story": true,
  "used_stories": [
-  "From the interviews I have given, I learned that y",
-  "The hardest part of coming from a non-tech backgro"
+  "From the interviews I have given, I learned that y"
  ],
  "used_project": false,
  "last_update_id": 1
