@@ -6,6 +6,8 @@ GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
 LI_TOKEN = os.environ.get("LINKEDIN_ACCESS_TOKEN")
 AUTHOR_URN = os.environ.get("AUTHOR_URN")
 DRY_RUN = os.environ.get("DRY_RUN") == "1"
+# 1 = Telegram updates Cloudflare Worker se aate hain (getUpdates band). 0/khali = purana polling tareeka.
+WEBHOOK_MODE = os.environ.get("WEBHOOK_MODE") == "1"
 
 STATE_FILE = "state.json"
 STORIES_FILE = "stories.txt"
@@ -301,6 +303,8 @@ def send_preview(s):
     say(f"{header}\n\n{s['text']}", BUTTONS)
 
 def get_updates(offset):
+    if WEBHOOK_MODE:
+        return []
     body = {"offset": offset, "timeout": 0, "allowed_updates": ["message", "callback_query"]}
     d = tg_call("getUpdates", body)
     if d.get("error_code") == 409:
@@ -703,7 +707,7 @@ def cmd_generate():
         say("⏸ Pichli post abhi scheduled hai, isliye nayi draft nahi bana rahi. "
             "Pehle use post ya ❌ Skip karo.")
         return
-    if not s.get("offset"):
+    if not WEBHOOK_MODE and not s.get("offset"):
         res = get_updates(-1)
         if res:
             s["offset"] = res[-1]["update_id"] + 1
@@ -752,12 +756,36 @@ def cmd_generate():
     save_state(s)
     send_preview(s)
 
+def cmd_handle():
+    raw = os.environ.get("UPDATE_JSON", "")
+    try:
+        u = json.loads(raw)
+    except Exception:
+        print("No valid update received")
+        return
+    if not isinstance(u, dict):
+        print("Update is not an object")
+        return
+    s = load_state()
+    uid = u.get("update_id") or 0
+    if uid and uid <= s.get("last_update_id", 0):
+        print("Duplicate update, skipping")
+        return
+    if uid:
+        s["last_update_id"] = uid
+    if "callback_query" in u:
+        handle_callback(s, u["callback_query"])
+    elif "message" in u:
+        handle_message(s, u["message"])
+    save_state(s)
+
 def cmd_poll():
     s = load_state()
     if s.get("status") not in ACTIVE:
         print("Nothing pending")
         return
-    for u in get_updates(s.get("offset", 0)):
+    updates = [] if WEBHOOK_MODE else get_updates(s.get("offset", 0))
+    for u in updates:
         s["offset"] = u["update_id"] + 1
         if "callback_query" in u:
             handle_callback(s, u["callback_query"])
@@ -785,5 +813,7 @@ if __name__ == "__main__":
         cmd_generate()
     elif mode == "poll":
         cmd_poll()
+    elif mode == "handle":
+        cmd_handle()
     else:
-        print("Usage: python script.py generate|poll")
+        print("Usage: python script.py generate|poll|handle")
