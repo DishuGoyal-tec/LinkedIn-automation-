@@ -35,6 +35,7 @@ jobs:
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
           AUTHOR_URN: ${{ secrets.AUTHOR_URN }}
           WEBHOOK_MODE: ${{ vars.WEBHOOK_MODE }}
+          TEST_WEEKDAY: ${{ vars.TEST_WEEKDAY }}
         run: python script.py generate
 
       - name: Save state
