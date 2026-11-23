@@ -43,32 +43,33 @@ LANG_RULES = {
             "Never write full Hindi sentences, never use slang or casual fillers like 'yaar' or 'bhai'."),
 }
 
-# weekday: (pillar, language, [styles that rotate week by week], story tags, angles)   0 = Monday ... 6 = Sunday
+# weekday: (pillar, language, [styles that rotate week by week], story tags (used by the story style), angles)
+# 0 = Monday ... 6 = Sunday
 PILLARS = {
-    0: ("Business Analyst career guidance for freshers from non-tech backgrounds", "en", ["tutorial", "opinion"],
-        ["career", "job", "general"], [
-        "what a Business Analyst actually does in a normal work day",
+    0: ("Business Analyst career guidance for freshers from non-tech backgrounds", "en", ["opinion", "story"],
+        ["career", "sql", "tool", "fnb"], [
+        "what people get wrong about the Business Analyst job",
         "how to read a Data/Business Analyst job description and spot what really matters",
-        "the first 3 skills to learn for a BA role, in order",
+        "the first skills to learn for a BA role, and what to skip",
         "how to turn a college or course project into a strong resume line",
     ]),
-    1: ("Practical tool tip (Google Sheets, Excel, SQL)", "en", ["tutorial"],
-        ["tool", "sql", "fnb", "mistake", "general"], [
-        "one Google Sheets formula that saves time, with a tiny worked example",
-        "a beginner SQL pattern (like GROUP BY) explained with a small example table",
-        "a common data cleaning mistake and how to fix it step by step",
+    1: ("Practical tool tip (Google Sheets, Excel, SQL)", "en", ["tutorial", "mistake"],
+        [], [
+        "one Google Sheets formula that saves time",
+        "a beginner SQL pattern (like GROUP BY) in plain words",
+        "a common data cleaning mistake and how to fix it",
         "one habit that makes a report easy for a manager to read",
     ]),
     2: ("Project breakdown from real work", "en", ["project"], [], []),
-    3: ("Job hunt reality for freshers", "mix", ["story", "mistake"],
-        ["job", "mistake", "career", "fnb", "general"], [
+    3: ("Job hunt reality for freshers", "mix", ["story", "opinion"],
+        ["job", "career", "fnb"], [
         "how to follow up politely after applying",
         "what to do when applications get no replies",
         "how to prepare for a business case question in a BA interview",
         "how to explain a career switch honestly in an interview",
     ]),
     4: ("Myth vs reality, and real work", "mix", ["myth", "project"],
-        ["career", "job", "mistake", "general"], [
+        [], [
         "myth: you must be a coding expert to become a Business Analyst",
         "myth: only an MBA or a top college gets you a good analyst job",
         "myth: more certificates means more job offers",
@@ -76,7 +77,7 @@ PILLARS = {
     ]),
     5: ("Personal update: job search and portfolio", "mix", ["notes"], [], []),
     6: ("Weekend discussion", "mix", ["discussion"],
-        ["career", "job", "general"], [
+        [], [
         "ask the community what helped them most in their career this year",
         "ask which skill people are learning right now and why",
         "ask what advice they wish they got as a fresher",
@@ -85,85 +86,100 @@ PILLARS = {
 }
 
 BLUEPRINTS = {
-    "tutorial": """STYLE: Mini tutorial. Build the post in this order:
-- Hook: the problem or a specific scenario in one line.
-- A concrete scenario with specific details (for example a cafe's daily sales, a small table, a job application).
-- A named formula, function or method that solves it (for example Sales = customers x average bill, a Sheets function, GROUP BY), with a tiny worked example using concrete numbers.
-- 3 short numbered steps the reader can follow.
-- One common mistake to avoid.
-- A line starting with "Try this today:" giving one small 10-minute exercise.""",
-    "story": """STYLE: Story plus lesson. Build the post in this order:
-- Hook taken from the real moment.
-- Tell the real moment in 3 to 4 plain sentences: the situation, what was done, what happened. Use ONLY what is in the real moment.
-- The lesson as 2 or 3 numbered takeaways the reader can apply, each with a concrete detail.
-- A line starting with "Try this today:" giving one small action.""",
-    "myth": """STYLE: Myth-busting with an example. Build the post in this order:
-- Hook starting with "Myth:" and the myth.
-- One line starting with "Reality:".
-- A concrete example or mini-scenario that proves it, with numbers, named tools or a named method.
-- What to do instead as 3 short numbered steps.
-- A line starting with "Try this today:" giving one small action.""",
-    "discussion": """STYLE: Insight plus discussion. Build the post in this order:
-- Hook: a specific observation or question.
-- One useful insight in 3 to 4 lines, with a concrete example.
-- 2 or 3 numbered options or prompts the readers can answer with.""",
-    "opinion": """STYLE: Clear opinion. Build the post in this order:
-- Hook: one direct, specific stance in a single line, something a thoughtful practitioner would defend.
-- Why, in 2 or 3 short lines, with one concrete example, number or named tool.
-- The fair counterpoint: when the opposite view is right, in 1 or 2 lines.
-- What the reader should do next, in one line.""",
-    "mistake": """STYLE: Mistake to fix. Build the post in this order:
-- Hook naming the mistake in plain words.
-- What it looks like in practice, with a concrete example (use the real moment only if one is provided; otherwise a clearly labelled illustrative example).
-- Why it hurts, in 1 or 2 lines.
-- The fix as 3 short numbered steps.
-- A line starting with "Try this today:" giving one small action.""",
-    "project": """STYLE: Project breakdown. Build the post ONLY from the PROJECT FACTS provided. Order:
-- Hook: the business question, or the most striking real finding from the facts.
-- The problem in 1 or 2 lines.
-- What was built or analysed (data and tools), in 2 lines, only from the facts.
-- 2 or 3 numbered findings or decisions, only from the facts.
-- One honest limit or lesson, only if the facts contain one; otherwise one lesson about the method.
-- Invite readers to ask about the project or tell how they would approach it.""",
+    "story": """STYLE: Story-led post, conversational.
+- Line 1: a sharp line drawn from the real moment that makes people want to read on.
+- The real moment in 2 to 4 plain sentences: the situation and what happened. Use ONLY what is in the real moment. Stay concrete.
+- One short paragraph on what it taught, or what most people miss.
+- One practical tip for the reader in a sentence or two.
+- Closing line as required.""",
+    "opinion": """STYLE: Honest opinion.
+- Line 1: a clear stance a thoughtful practitioner would defend, slightly uncomfortable or surprising.
+- Two short paragraphs on why, with one concrete example in plain prose (a hypothetical one is fine if introduced with 'Imagine' or 'Say').
+- One sentence of fairness: when the opposite is true.
+- One sentence on what the reader should do about it.
+- Closing line as required.""",
+    "tutorial": """STYLE: One small useful tip, explained the way a friendly colleague would.
+- Line 1: the problem, or a surprising claim about the tip.
+- A tiny concrete scenario in flowing prose, introduced with 'Imagine' or 'Say', with numbers that add up.
+- The tip itself in 2 or 3 plain sentences: the formula, function or query to use and why it works.
+- At most 3 short steps, and only if the tip truly has steps; otherwise write plain prose.
+- Closing line as required.""",
+    "mistake": """STYLE: A mistake worth fixing.
+- Line 1: name the mistake plainly.
+- What it looks like in practice (use the real moment only if one is provided; otherwise a hypothetical introduced with 'Imagine' or 'Say').
+- Why it hurts, in one or two sentences.
+- The fix in two or three plain sentences.
+- Closing line as required.""",
+    "myth": """STYLE: Myth-busting, sharp and short.
+- Line 1: the myth, stated the way people actually say it.
+- One sentence flipping it, then the proof in plain prose with one concrete example or named tool.
+- What to do instead, in two sentences.
+- Closing line as required.""",
+    "project": """STYLE: Project breakdown, told like you are explaining it to a colleague.
+- Line 1: the business question, or the most striking real finding from the facts.
+- The problem in one or two sentences.
+- What was built or analysed (data and tools) in two sentences, only from the facts.
+- One or two findings, only from the facts, in plain prose.
+- One honest limit or lesson, only if the facts contain one.
+- Closing line as required.""",
+    "discussion": """STYLE: Insight plus discussion.
+- Line 1: a specific observation or question.
+- One useful insight in 3 to 4 lines with a concrete example.
+- 2 or 3 options readers can answer with, written in one flowing sentence.
+- The closing question is required.""",
 }
 
-NEEDS_TRY = ("tutorial", "story", "myth", "mistake")
-
 HOOKS = [
-    "Open with a specific number or concrete result.",
-    "Open with a direct, slightly contrarian statement.",
-    "Open with a one-line generic scenario about a fresher or an analyst (third person or 'you'; never invent facts about the creator).",
-    "Open with a direct question to the reader.",
-    "Open with a plain statement of a common mistake.",
+    "Open with a blunt, slightly uncomfortable statement.",
+    "Open with a specific number or concrete detail.",
+    "Open by naming the thing people get wrong.",
+    "Open with 'Imagine' and a tiny scene (hypothetical, never about the creator).",
+    "Open with a short contrast, like 'X is easy. Y is the hard part.'",
 ]
 
 ENDINGS = {
-    "question": "End the body with one genuine question for readers.",
-    "takeaway": "End the body with one short, memorable takeaway line (no question).",
-    "invite": "End the body by inviting readers to share their own example or experience in the comments.",
+    "question": "End with one easy-to-answer question that a reader could answer in a single line.",
+    "takeaway": "End with one punchy takeaway line (no question).",
+    "invite": "End by inviting readers to drop their own example in the comments.",
 }
 ENDING_ROTATION = ["question", "takeaway", "question", "invite"]
 
 def format_rules(ending="question"):
     return f"""FORMAT (plain text only):
 - Line 1 is the hook, under 14 words.
-- Blank line between every block. Each paragraph is at most 2 short lines.
-- Numbered steps or findings: each on its own line as 1) 2) 3), with a blank line before the list.
-- Labels like "Example:", "Reality:" or "Try this today:" start their own line.
+- Blank line between paragraphs. Each paragraph is 1 to 3 sentences. Do NOT put every sentence on its own line.
 - {ENDINGS[ending]} This is the second last block.
 - The last line is exactly 3 relevant hashtags.
-- No markdown: no asterisks, no headings, no bullet symbols."""
+- No markdown: no asterisks, no headings, no bullet symbols. Do not use dashes as punctuation."""
 
 FORMAT_RULES = format_rules("question")
 
 TONE_RULES = """TONE: a thoughtful working professional sharing something useful. Calm, specific, respectful. Not an influencer.
-Avoid phrases like: game-changer, brutal truth, let that sink in, unlock, dive deep, in today's fast-paced world.
 No emojis."""
+
+HUMAN_RULES = """HUMAN VOICE (very important):
+- Write like a sharp colleague talking to one person. Plain words, contractions are fine (don't, it's).
+- The first two lines must make someone want to tap 'see more'. Never open with a generic question like 'Do you know what X does?'.
+- One idea only. Do not try to teach everything.
+- Vary sentence length. Avoid symmetrical lists. Use a numbered list only if the content truly has steps.
+- Never use these: 'Here is how', 'Here's how', 'In today's', 'game-changer', 'unlock', 'dive into', 'delve', 'journey', 'leverage', "Let's", 'tips and tricks', 'Try this today', 'In conclusion', 'At the end of the day'.
+- Do not use the labels 'Example:' or 'Reality:'. Introduce a hypothetical with 'Imagine' or 'Say'.
+- Do not use em dashes or en dashes anywhere.
+- Check every calculation. If you are not sure the numbers add up, use no numbers."""
+
+BANNED = ["here is how", "here's how", "in today's", "game-changer", "game changer", "unlock", "dive into",
+          "delve", "journey", "leverage", "let's", "tips and tricks", "try this today", "in conclusion",
+          "at the end of the day", "example:", "reality:"]
+
+def find_tells(text, style="x"):
+    t = text.lower()
+    return [b for b in BANNED if b in t]
 
 # ---------------- formatting helper ----------------
 
 def format_post(text):
     text = text.replace("\r\n", "\n").replace("**", "").replace("__", "")
+    text = text.replace(" — ", ", ").replace("—", ", ").replace(" – ", ", ")
     text = re.sub(r"^\s*[\*\-•]\s+", "", text, flags=re.M)
     text = re.sub(r"[ \t]+\n", "\n", text)
     text = re.sub(r"(?<=\S)[ \t]+(?=\d\) )", "\n", text)
@@ -368,7 +384,8 @@ def gemini_text(prompt, min_words=150, max_words=260):
 def story_block(story, required):
     if not story:
         return ("No real moment is provided. Speak to the reader as 'you'. "
-                "Do not write 'I' anywhere and do not claim any personal experience.")
+                "Do not write 'I' as if you had personal experience. Opinions such as 'I think' are allowed, "
+                "but never claim things happened to the creator.")
     use = ("Build the post around it." if required else
            "Use it in 1 to 3 lines as the opening or as proof, only if it fits naturally; otherwise ignore it.")
     return (f"REAL MOMENT FROM THE CREATOR (true; the only personal facts you may use; "
@@ -383,8 +400,8 @@ def material_block(style, story, project):
     return story_block(story, style == "story")
 
 def build_prompt(pillar, style, angle, lang, story, project, hook, ending):
-    hook_rule = "" if style in ("myth", "discussion") else f"HOOK STYLE: {hook}\n"
-    angle_line = f"TODAY'S ANGLE: {angle}\n" if (angle and style != "project") else ""
+    hook_rule = "" if style in ("myth", "discussion", "story", "project") else f"HOOK STYLE: {hook}\n"
+    angle_line = f"TODAY'S ANGLE: {angle}\n" if (angle and style not in ("project", "story")) else ""
     return f"""You are ghostwriting a LinkedIn post for a creator who gives practical career and data guidance to freshers and small business people in India.
 
 CREATOR FACTS (background only; never expand or embellish them; mention at most one, exactly as written, only if it truly fits):
@@ -395,6 +412,8 @@ CREATOR FACTS (background only; never expand or embellish them; mention at most 
 LANGUAGE: {LANG_RULES[lang]}
 {TONE_RULES}
 
+{HUMAN_RULES}
+
 TODAY'S PILLAR: {pillar}
 {angle_line}{hook_rule}
 {BLUEPRINTS[style]}
@@ -402,26 +421,27 @@ TODAY'S PILLAR: {pillar}
 {format_rules(ending)}
 
 CONTENT RULES:
-- Length: around 200 words (between 170 and 230).
-- The post must be genuinely useful: include at least one concrete example with specific numbers, a named formula, function, query or tool. No generic advice like "stay consistent" or "believe in yourself" unless made concrete.
-- Illustrative examples are fine, but label them "Example:" and never present them as something that happened to the creator. Do not invent clients, companies, names or results.
-- Every sentence should add information. No filler, no repeating the hook.
+- Length: around 130 words (between 110 and 150). Shorter is better than padded.
+- Include at least one concrete detail: a number, a named tool, a formula, a query or a real finding.
+- Illustrative examples are fine, but introduce them with 'Imagine' or 'Say' and never present them as something that happened to the creator. Do not invent clients, companies, names or results.
+- Every sentence should add something. No filler, no repeating the hook.
 Output only the post text."""
 
 def quality_pass(text, style, story, project, ending):
-    last_check = ("It has a line starting with 'Try this today:' with one small action."
-                  if style in NEEDS_TRY else "It ends exactly as the ending rule in the format says.")
-    facts_check = ("8) Every number, finding and tool in the post appears in the PROJECT FACTS. Remove anything that does not.\n"
+    facts_check = ("9) Every number, finding and tool in the post appears in the PROJECT FACTS. Remove anything that does not.\n"
                    if style == "project" else "")
     prompt = f"""You are a strict LinkedIn editor. Check the post below against this checklist:
-1) The hook is specific and under 14 words.
-2) It has at least one concrete example, formula, function, finding or tool with specifics (numbers, names).
-3) It has numbered steps or points, each on its own line (an opinion post may use short paragraphs instead).
-4) {last_check}
-5) It is between 170 and 230 words.
-6) No generic advice, no cliches, no invented claims, no personal experience claims beyond the real moment or project facts.
-7) It follows the format rules.
+1) The first line is under 14 words and makes someone want to read on (not a generic question).
+2) One idea only.
+3) It sounds like a person talking: plain words, varied sentence lengths, no listicle symmetry, no AI-sounding phrases.
+4) None of the banned phrases or labels from the HUMAN VOICE rules, and no dashes used as punctuation.
+5) Every calculation and number is correct and consistent. Hypothetical numbers are introduced with 'Imagine' or 'Say'.
+6) No invented experiences. Personal facts come only from the real material below.
+7) It is between 110 and 150 words.
+8) The ending follows the ending rule, and the last line is exactly 3 hashtags.
 {facts_check}
+{HUMAN_RULES}
+
 {format_rules(ending)}
 
 {material_block(style, story, project)}
@@ -430,7 +450,19 @@ If every item passes, output the post unchanged. Otherwise rewrite it to fix the
 
 POST:
 {text}"""
-    return gemini_text(prompt, 150, 260)
+    return gemini_text(prompt, 90, 180)
+
+def fix_tells(text, style):
+    found = find_tells(text, style)
+    if not found:
+        return text
+    prompt = f"""Rewrite this LinkedIn post so it no longer contains these phrases or labels: {', '.join(found)}.
+Do not use dashes as punctuation. Keep the meaning, the facts, the length and the layout. Output only the post text.
+
+POST:
+{text}"""
+    fixed = gemini_text(prompt, 90, 180)
+    return fixed or text
 
 def polish_notes(notes, lang):
     prompt = f"""Turn the creator's own notes into a LinkedIn post.
@@ -438,24 +470,26 @@ def polish_notes(notes, lang):
 LANGUAGE: {LANG_RULES[lang]}
 {TONE_RULES}
 
+{HUMAN_RULES}
+
 {FORMAT_RULES}
 
 CONTENT RULES:
 - Use ONLY facts present in the notes. Do not invent details, numbers, names, companies or outcomes.
-- First person is allowed because these are the creator's own notes. Fix grammar and make it clear.
-- Where possible, turn the notes into one useful takeaway for the reader, using only what the notes support.
-- 120 to 200 words in total.
+- First person is allowed because these are the creator's own notes. Fix grammar and make it clear and warm.
+- Where possible, add one useful takeaway for the reader, using only what the notes support.
+- 90 to 150 words in total.
 
 NOTES:
 {notes}
 
 Output only the post text."""
-    return gemini_text(prompt, 60, 240)
+    return gemini_text(prompt, 50, 200)
 
 def revise_text(current, instruction):
     prompt = f"""Edit this LinkedIn post according to the instruction.
-Keep it professional, keep the same language style, and keep the format below.
-Do not invent personal stories, numbers or results. Keep it concrete and useful.
+Change only what the instruction asks for. Keep the human, conversational voice and the format below.
+Do not invent personal stories, numbers or results. Do not use dashes as punctuation.
 
 INSTRUCTION: {instruction}
 
@@ -465,7 +499,7 @@ POST:
 {current}
 
 Output only the final post text."""
-    return gemini_text(prompt, 40, 300)
+    return gemini_text(prompt, 40, 250)
 
 # ---------------- gemini image (optional) ----------------
 
@@ -730,90 +764,23 @@ def cmd_generate():
             "Job search ya portfolio ka kya update hai? 3-5 lines mein notes bhejo "
             "(Hinglish chalega). Main unhe sirf polish karungi, kuch nayi cheez nahi jodungi.")
         return
-    story = pick_story(tags, s)
+    story = None
     project = None
-    if style == "project":
+    if style == "story":
+        story = pick_story(tags, s)
+        if not story:
+            style = "opinion"
+    elif style == "mistake":
+        story = pick_story(["mistake"], s)
+    elif style == "project":
         project = pick_project(s)
         if not project:
-            style = "tutorial"
-    if style == "story" and not story:
-        style = "tutorial"
-    if style == "tutorial" and not angle:
-        angle = "one practical data analysis habit that helps freshers"
+            style = "opinion"
+    if style in ("opinion", "tutorial", "mistake", "myth") and not angle:
+        angle = "one thing freshers get wrong about data jobs"
     s["style"] = style
-    s["used_story"] = bool(story) and style != "project"
+    s["used_story"] = bool(story)
     s["used_project"] = bool(project)
-    text = gemini_text(build_prompt(pillar, style, angle, lang, story, project, hook, ending))
+    text = gemini_text(build_prompt(pillar, style, angle, lang, story, project, hook, ending), 90, 180)
     if text:
-        improved = quality_pass(text, style, story, project, ending)
-        text = improved or text
-    if not text:
-        s["status"] = "idle"
-        save_state(s)
-        say("Gemini failed. Aaj ka draft nahi ban paya.")
-        sys.exit(1)
-    s["text"], s["status"] = text, "pending"
-    save_state(s)
-    send_preview(s)
-
-def cmd_handle():
-    raw = os.environ.get("UPDATE_JSON", "")
-    try:
-        u = json.loads(raw)
-    except Exception:
-        print("No valid update received")
-        return
-    if not isinstance(u, dict):
-        print("Update is not an object")
-        return
-    s = load_state()
-    uid = u.get("update_id") or 0
-    if uid and uid <= s.get("last_update_id", 0):
-        print("Duplicate update, skipping")
-        return
-    if uid:
-        s["last_update_id"] = uid
-    if "callback_query" in u:
-        handle_callback(s, u["callback_query"])
-    elif "message" in u:
-        handle_message(s, u["message"])
-    save_state(s)
-
-def cmd_poll():
-    s = load_state()
-    if s.get("status") not in ACTIVE:
-        print("Nothing pending")
-        return
-    updates = [] if WEBHOOK_MODE else get_updates(s.get("offset", 0))
-    for u in updates:
-        s["offset"] = u["update_id"] + 1
-        if "callback_query" in u:
-            handle_callback(s, u["callback_query"])
-        elif "message" in u:
-            handle_message(s, u["message"])
-        save_state(s)
-    if s.get("status") == "scheduled":
-        try:
-            due = datetime.datetime.fromisoformat(s["publish_at"])
-        except Exception:
-            due = None
-        now = datetime.datetime.now(IST)
-        if due and now >= due:
-            if now > due + datetime.timedelta(hours=LATE_LIMIT_HOURS):
-                s["status"] = "pending"
-                say("⚠️ Scheduled time nikal gaya (GitHub late chala), isliye post nahi ki. "
-                    "Approve (agla slot) ya ⚡ Post now dabao.")
-            else:
-                do_post(s)
-    save_state(s)
-
-if __name__ == "__main__":
-    mode = sys.argv[1] if len(sys.argv) > 1 else ""
-    if mode == "generate":
-        cmd_generate()
-    elif mode == "poll":
-        cmd_poll()
-    elif mode == "handle":
-        cmd_handle()
-    else:
-        print("Usage: python script.py generate|poll|handle")
+        text = quality_pass(text, style, story,
