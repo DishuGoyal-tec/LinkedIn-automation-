@@ -1,16 +1,17 @@
 {
  "offset": 901335708,
  "status": "pending",
- "date": "2026-11-23",
- "pillar": "Business Analyst career guidance for freshers from non-tech backgrounds",
- "angle": "what a Business Analyst actually does in a normal work day",
- "lang": "en",
- "text": "Do you know what a Business Analyst actually does all day?\n\nExample: A local restaurant manager wants to know why Tuesday evening revenue dropped to 8,000 rupees last week compared to 15,000 rupees on normal Tuesdays.\n\nThe analyst uses a simple formula to break this down: Total Revenue equals Footfall multiplied by Average Order Value.\n\nIf footfall fell from 100 customers to 50, but average order value stayed at 160 rupees, the problem is customer traffic, not menu pricing.\n\nTo find this, a business analyst usually opens Google Sheets or writes a basic SQL query to filter the daily sales table by day of the week.\n\nHere is how you can practice this exact workflow today.\n\n1) Create a small table with dates, customer counts, and bill amounts.\n\n2) Calculate the average order value using a basic division formula.\n\n3) Group the rows by weekday using a pivot table to compare trends.\n\nReality: Many freshers spend weeks learning complex machine learning algorithms instead of mastering basic table aggregations.\n\nTry this today: Open a spreadsheet and calculate daily revenue totals from a sample dataset of fifty transactions using simple formulas.\n\nHow do you usually explain daily revenue drops to your team?\n\n#BusinessAnalyst #DataSkills #CareerAdvice",
+ "date": "2026-11-26",
+ "pillar": "Job hunt reality for freshers",
+ "angle": "how to follow up politely after applying",
+ "lang": "mix",
+ "text": "You do not need to write complex code to automate manual reporting.\n\nI built a daily and monthly sales tracking system for every outlet in Google Sheets using Google Apps Script, with AI helping me build it. It replaced manual reporting with one connected system.\n\nMany data professionals spend months trying to learn advanced machine learning before they understand basic business flows. But most companies do not need neural networks to fix their daily headaches. They need clean numbers delivered on time without someone copying and pasting data every morning.\n\nTools matter less than knowing what question the business actually needs answered. If you can bridge the gap between messy source files and a clear dashboard, you are already valuable.\n\nDrop your own automation example in the comments below.\n\n#DataAnalytics #GoogleSheets #ProcessImprovement",
  "image_file_id": null,
- "style": "tutorial",
+ "style": "story",
  "used_story": true,
  "used_stories": [
-  "From the interviews I have given, I learned that y"
+  "From the interviews I have given, I learned that y",
+  "I built a daily and monthly sales tracking system "
  ],
  "used_project": false,
  "last_update_id": 1
