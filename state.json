@@ -1,6 +1,6 @@
 {
  "offset": 901335708,
- "status": "pending",
+ "status": "scheduled",
  "date": "2026-11-26",
  "pillar": "Job hunt reality for freshers",
  "angle": "how to follow up politely after applying",
@@ -14,5 +14,7 @@
   "I built a daily and monthly sales tracking system "
  ],
  "used_project": false,
- "last_update_id": 1
+ "last_update_id": 901335708,
+ "publish_at": "2026-11-27T11:00:00+05:30",
+ "fail_count": 0
 }
