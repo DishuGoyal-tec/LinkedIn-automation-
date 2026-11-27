@@ -1,14 +1,14 @@
 {
  "offset": 901335708,
- "status": "pending",
- "date": "2026-11-26",
- "pillar": "Job hunt reality for freshers",
- "angle": "how to follow up politely after applying",
+ "status": "awaiting_notes",
+ "date": "2026-11-28",
+ "pillar": "Personal update: job search and portfolio",
+ "angle": "",
  "lang": "mix",
- "text": "You do not need to write complex code to automate manual reporting.\n\nI built a daily and monthly sales tracking system for every outlet in Google Sheets using Google Apps Script, with AI helping me build it. It replaced manual reporting with one connected system.\n\nMany data professionals spend months trying to learn advanced machine learning before they understand basic business flows. But most companies do not need neural networks to fix their daily headaches. They need clean numbers delivered on time without someone copying and pasting data every morning.\n\nTools matter less than knowing what question the business actually needs answered. If you can bridge the gap between messy source files and a clear dashboard, you are already valuable.\n\nDrop your own automation example in the comments below.\n\n#DataAnalytics #GoogleSheets #ProcessImprovement",
+ "text": "",
  "image_file_id": null,
- "style": "story",
- "used_story": true,
+ "style": "notes",
+ "used_story": false,
  "used_stories": [
   "From the interviews I have given, I learned that y",
   "I built a daily and monthly sales tracking system "
