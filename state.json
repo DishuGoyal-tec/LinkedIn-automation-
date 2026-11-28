@@ -1,11 +1,11 @@
 {
  "offset": 901335708,
- "status": "awaiting_notes",
+ "status": "pending",
  "date": "2026-11-28",
  "pillar": "Personal update: job search and portfolio",
  "angle": "",
  "lang": "mix",
- "text": "",
+ "text": "Most people treat hackathons as a resume line rather than a real test.\n\nWe usually rush to build something massive instead of focusing on a single working feature. It is far better to narrow the scope early and finish one problem completely. Judges and teams care much more about execution than an unfinished vision. When you keep the goal simple, the actual building becomes much easier to manage.\n\nWhat is your preferred approach when building under a tight deadline?\n\n#Hackathons #SoftwareEngineering #TechCareers",
  "image_file_id": null,
  "style": "notes",
  "used_story": false,
@@ -14,7 +14,7 @@
   "I built a daily and monthly sales tracking system "
  ],
  "used_project": false,
- "last_update_id": 901335711,
+ "last_update_id": 901335713,
  "publish_at": "2026-11-27T11:00:00+05:30",
  "fail_count": 0
 }
